@@ -1,6 +1,12 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim() || "";
+const isLocalDevApiUrl =
+  /^https?:\/\/(localhost|127\.0\.0\.1):8000\/?$/.test(configuredApiUrl);
+const API_URL =
+  import.meta.env.PROD && isLocalDevApiUrl
+    ? ""
+    : configuredApiUrl.replace(/\/$/, "");
 
 export async function runTriage(file) {
   const formData = new FormData();

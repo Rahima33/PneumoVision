@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -6,23 +6,32 @@ from langchain_community.vectorstores import Chroma
 from dotenv import load_dotenv
 load_dotenv()
 
-PERSIST_DIR = "rag/chroma_db"
+ROOT_DIR = Path(__file__).resolve().parent.parent
+PERSIST_DIR = ROOT_DIR / "rag" / "chroma_db"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
-# Loaded once, at import time, so repeated calls don't reload the model
-# or reopen the store from disk each time.
-_embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+_embeddings = None
+_vectorstore = None
 
-if not os.path.exists(PERSIST_DIR):
-    raise FileNotFoundError(
-        f"Knowledge base not found at {PERSIST_DIR}/. "
-        f"Run `uv run python -m rag.build_knowledge_base` first."
+
+def _get_vectorstore():
+    global _embeddings, _vectorstore
+
+    if _vectorstore is not None:
+        return _vectorstore
+
+    if not PERSIST_DIR.exists():
+        raise FileNotFoundError(
+            f"Knowledge base not found at {PERSIST_DIR}/. "
+            f"Run `uv run python -m rag.build_knowledge_base` first."
+        )
+
+    _embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
+    _vectorstore = Chroma(
+        persist_directory=str(PERSIST_DIR),
+        embedding_function=_embeddings,
     )
-
-_vectorstore = Chroma(
-    persist_directory=PERSIST_DIR,
-    embedding_function=_embeddings,
-)
+    return _vectorstore
 
 
 def retrieve_guidelines(query, k=4):
@@ -41,7 +50,7 @@ def retrieve_guidelines(query, k=4):
             "source": originating PDF filename
             "page": page number within that PDF
     """
-    results = _vectorstore.similarity_search(query, k=k)
+    results = _get_vectorstore().similarity_search(query, k=k)
 
     return [
         {

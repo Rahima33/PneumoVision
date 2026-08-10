@@ -31,7 +31,6 @@ from gradcam.gradcam import (
     preprocess_image_xrv,
     overlay_heatmap,
 )
-from rag.retriever import retrieve_guidelines
 
 # ==========================
 # Config
@@ -155,11 +154,29 @@ def flag_for_review(state: TriageState) -> dict:
 
 def retrieve_guidelines_node(state: TriageState) -> dict:
     query = RETRIEVAL_QUERIES[state["prediction"]]
-    chunks = retrieve_guidelines(query, k=RETRIEVAL_K)
-    return {"retrieved_chunks": chunks}
+    try:
+        from rag.retriever import retrieve_guidelines
+
+        chunks = retrieve_guidelines(query, k=RETRIEVAL_K)
+        return {"retrieved_chunks": chunks}
+    except Exception as exc:
+        return {
+            "retrieved_chunks": [],
+            "retrieval_sufficient": False,
+            "retrieval_reasoning": f"Guideline retrieval unavailable: {exc}",
+        }
 
 
 def grade_retrieval(state: TriageState) -> dict:
+    if not state.get("retrieved_chunks"):
+        return {
+            "retrieval_sufficient": False,
+            "retrieval_reasoning": state.get(
+                "retrieval_reasoning",
+                "No guideline content was retrieved.",
+            ),
+        }
+
     chunks_text = "\n\n---\n\n".join(
         f"[Source: {c['source']}, page {c['page']}]\n{c['text']}"
         for c in state["retrieved_chunks"]

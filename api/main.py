@@ -1,14 +1,19 @@
 import base64
 import tempfile
 import os
+from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from agent.triage_agent import build_triage_graph
 from api.schemas import TriageResponse
 
 app = FastAPI(title="MediFlow Triage API")
+ROOT_DIR = Path(__file__).resolve().parent.parent
+FRONTEND_DIST = ROOT_DIR / "frontend" / "dist"
 
 frontend_origins = os.getenv(
     "FRONTEND_ORIGINS",
@@ -25,6 +30,18 @@ app.add_middleware(
 
 # Load once at startup, not per-request
 _triage_app = build_triage_graph()
+
+
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+
+@app.get("/")
+def root():
+    index_path = FRONTEND_DIST / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+    return {"status": "ok"}
 
 
 @app.post("/triage", response_model=TriageResponse)
@@ -57,3 +74,15 @@ async def triage(file: UploadFile = File(...)):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/{full_path:path}")
+def spa_fallback(full_path: str):
+    if full_path.startswith(("triage", "health", "docs", "redoc", "openapi.json", "assets")):
+        return {"detail": "Not found"}
+
+    index_path = FRONTEND_DIST / "index.html"
+    if index_path.exists():
+        return FileResponse(index_path)
+
+    return {"detail": "Not found"}
