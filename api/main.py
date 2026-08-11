@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from agent.triage_agent import build_triage_graph
 from api.schemas import TriageResponse
 
-app = FastAPI(title="MediFlow Triage API")
+app = FastAPI(title="PneumoVision Triage API")
 ROOT_DIR = Path(__file__).resolve().parent.parent
 FRONTEND_DIST = ROOT_DIR / "frontend" / "dist"
 

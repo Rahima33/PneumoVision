@@ -66,7 +66,7 @@ export default function Predict() {
     const imgWidth = pageWidth - 40;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
     pdf.addImage(imgData, "PNG", 20, 20, imgWidth, imgHeight);
-    pdf.save(`mediflow-report-${Date.now()}.pdf`);
+    pdf.save(`pneumovision-report-${Date.now()}.pdf`);
   }
 
   function resetCase() {

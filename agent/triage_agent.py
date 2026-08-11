@@ -1,5 +1,5 @@
 """
-MediFlow Triage Agent (LangGraph)
+PneumoVision Triage Agent (LangGraph)
 
 image -> classify -> Grad-CAM -> confidence check -> retrieve guidelines
 -> grade retrieval -> generate report | flag for review

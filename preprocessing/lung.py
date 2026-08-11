@@ -1,5 +1,5 @@
 """
-Lung-field cropping for MediFlow, using a pretrained segmentation model.
+Lung-field cropping for PneumoVision, using a pretrained segmentation model.
 
 Motivation: Grad-CAM analysis on earlier model versions revealed two
 distinct problems:

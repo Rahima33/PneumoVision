@@ -1718,7 +1718,7 @@ wheels = [
 ]
 
 [[package]]
-name = "mediflow"
+name = "pneumovision"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

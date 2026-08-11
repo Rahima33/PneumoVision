@@ -1,4 +1,4 @@
-## MediFlow Docker Monolith
+## PneumoVision Docker Monolith
 
 This repository is being packaged as a simplified monolith for deployment.
 
@@ -35,8 +35,8 @@ Only keep assets that are needed to answer one uploaded X-ray at runtime. Everyt
 The Docker image builds the React frontend, installs the Python runtime dependencies, generates `rag/chroma_db/` from the tracked PDFs, and serves the app with FastAPI. The container uses Render's `$PORT` when provided and falls back to `8000` locally.
 
 ```powershell
-docker build -t mediflow:monolith .
-docker run --env-file .env -p 8000:8000 mediflow:monolith
+docker build -t pneumovision:monolith .
+docker run --env-file .env -p 8000:8000 pneumovision:monolith
 ```
 
 ### Render deployment

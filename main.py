@@ -1,5 +1,5 @@
 def main():
-    print("Hello from mediflow!")
+    print("Hello from pneumovision!")
 
 
 if __name__ == "__main__":

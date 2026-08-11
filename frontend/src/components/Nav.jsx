@@ -12,7 +12,7 @@ export default function Nav() {
     <nav className="border-b border-slate-800 bg-[#0a0e1a]/95 backdrop-blur sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
         <span className="text-white font-semibold text-lg tracking-tight">
-          MediFlow
+          PneumoVision
         </span>
         <div className="flex gap-8">
           {links.map((l) => (

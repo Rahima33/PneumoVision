@@ -1,5 +1,5 @@
 """
-CLAHE (Contrast Limited Adaptive Histogram Equalization) for MediFlow.
+CLAHE (Contrast Limited Adaptive Histogram Equalization) for PneumoVision.
 
 Chest X-rays often have uneven contrast -- some regions washed out,
 others too dark to see subtle detail -- because exposure settings and

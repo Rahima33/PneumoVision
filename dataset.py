@@ -1,5 +1,5 @@
 """
-MediFlowXrayDataset: a custom PyTorch Dataset replacing torchvision's
+PneumoVisionXrayDataset: a custom PyTorch Dataset replacing torchvision's
 ImageFolder, so that lung-field cropping and CLAHE can run on every
 image *before* the standard resize/augment/normalize/tensor pipeline.
 
@@ -18,7 +18,7 @@ Usage is designed to be a drop-in replacement:
     full_dataset = datasets.ImageFolder(root=TRAIN_DIR, transform=train_transform)
 
     # After:
-    full_dataset = MediFlowXrayDataset(root=TRAIN_DIR, transform=train_transform)
+    full_dataset = PneumoVisionXrayDataset(root=TRAIN_DIR, transform=train_transform)
 
 Everything downstream (random_split, DataLoader, WeightedRandomSampler,
 .samples, .classes, .class_to_idx) continues to work the same way, since
@@ -62,7 +62,7 @@ def _make_samples(root_dir):
     return samples, classes, class_to_idx
 
 
-class MediFlowXrayDataset(Dataset):
+class PneumoVisionXrayDataset(Dataset):
     def __init__(self, root, transform=None, use_lung_crop=True, use_clahe=True,
                  cache_dir=None, cache_size=256):
         """

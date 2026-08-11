@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: mediflow
+    name: pneumovision
     runtime: docker
     plan: standard
     dockerfilePath: ./Dockerfile

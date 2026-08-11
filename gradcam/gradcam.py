@@ -1,5 +1,5 @@
 """
-Grad-CAM implementation for MediFlow's xrv-pretrained DenseNet121 pneumonia classifier.
+Grad-CAM implementation for PneumoVision's xrv-pretrained DenseNet121 pneumonia classifier.
 
 Grad-CAM (Gradient-weighted Class Activation Mapping) answers:
 "Which regions of this X-ray most influenced the model's prediction?"
@@ -115,7 +115,7 @@ def create_model():
 
 
 def load_trained_model(checkpoint_path, device="cpu"):
-    """Load a fine-tuned ImageNet-backbone MediFlow checkpoint."""
+    """Load a fine-tuned ImageNet-backbone PneumoVision checkpoint."""
     model = create_model()
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     model.to(device)
