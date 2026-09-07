@@ -15,7 +15,6 @@ from typing import TypedDict
 from dotenv import load_dotenv
 load_dotenv()
 
-import torch
 from PIL import Image
 from pydantic import BaseModel, Field
 from langgraph.graph import StateGraph, END
@@ -24,13 +23,6 @@ try:
     from langchain_groq import ChatGroq
 except Exception:  # pragma: no cover - optional dependency path
     ChatGroq = None
-
-from gradcam.gradcam import (
-    GradCAM,
-    load_trained_xrv_model,
-    preprocess_image_xrv,
-    overlay_heatmap,
-)
 
 # ==========================
 # Config
@@ -109,12 +101,31 @@ class TriageState(TypedDict):
 
 
 # ==========================
-# Model loading (once, at import time)
+# Model loading (deferred until the first image request)
 # ==========================
 
-_model = load_trained_xrv_model(CHECKPOINT_PATH, device=DEVICE)
-_target_layer = _model.features.norm5
-_gradcam = GradCAM(_model, _target_layer)
+_model = None
+_target_layer = None
+_gradcam = None
+
+
+def preprocess_image_xrv(image_path):
+    from gradcam.gradcam import preprocess_image_xrv as _preprocess_image_xrv
+
+    return _preprocess_image_xrv(image_path)
+
+
+def _get_gradcam():
+    global _model, _target_layer, _gradcam
+
+    if _gradcam is None:
+        from gradcam.gradcam import GradCAM, load_trained_xrv_model
+
+        _model = load_trained_xrv_model(CHECKPOINT_PATH, device=DEVICE)
+        _target_layer = _model.features.norm5
+        _gradcam = GradCAM(_model, _target_layer)
+
+    return _gradcam
 
 
 # ==========================
@@ -123,9 +134,11 @@ _gradcam = GradCAM(_model, _target_layer)
 
 def load_and_classify(state: TriageState) -> dict:
     original_image, input_tensor = preprocess_image_xrv(state["image_path"])
-    cam, predicted_class, confidence = _gradcam.generate(input_tensor)
+    cam, predicted_class, confidence = _get_gradcam().generate(input_tensor)
 
     os.makedirs(GRADCAM_OUTPUT_DIR, exist_ok=True)
+    from gradcam.gradcam import overlay_heatmap
+
     overlay = overlay_heatmap(original_image, cam)
 
     base_name = os.path.splitext(os.path.basename(state["image_path"]))[0]
@@ -153,6 +166,13 @@ def flag_for_review(state: TriageState) -> dict:
 
 
 def retrieve_guidelines_node(state: TriageState) -> dict:
+    if os.getenv("DISABLE_LOCAL_RAG", "0").lower() in {"1", "true", "yes"}:
+        return {
+            "retrieved_chunks": [],
+            "retrieval_sufficient": False,
+            "retrieval_reasoning": "Local retrieval is disabled for the 512 MB deployment.",
+        }
+
     query = RETRIEVAL_QUERIES[state["prediction"]]
     try:
         from rag.retriever import retrieve_guidelines
@@ -168,6 +188,12 @@ def retrieve_guidelines_node(state: TriageState) -> dict:
 
 
 def grade_retrieval(state: TriageState) -> dict:
+    if os.getenv("DISABLE_LOCAL_RAG", "0").lower() in {"1", "true", "yes"}:
+        return {
+            "retrieval_sufficient": True,
+            "retrieval_reasoning": "Local retrieval disabled; report uses model output without guideline excerpts.",
+        }
+
     if not state.get("retrieved_chunks"):
         return {
             "retrieval_sufficient": False,

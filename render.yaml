@@ -11,3 +11,5 @@ services:
         sync: false
       - key: HF_TOKEN
         sync: false
+      - key: DISABLE_LOCAL_RAG
+        value: "true"

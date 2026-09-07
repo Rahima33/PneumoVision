@@ -14,11 +14,13 @@ class TriageAgentStartupTests(unittest.TestCase):
     def test_import_without_groq_key(self):
         self.assertTrue(callable(self.module.build_triage_graph))
 
-    def test_live_agent_uses_xrv_checkpoint_and_model(self):
+    def test_live_agent_loads_xrv_model_on_demand(self):
         expected = os.path.normpath(os.path.join("models", "best_model_xrv_backbone.pth"))
         actual = os.path.normpath(self.module.CHECKPOINT_PATH)
 
         self.assertEqual(actual, expected)
+        self.assertIsNone(self.module._model)
+        self.module._get_gradcam()
         self.assertEqual(self.module._model.__class__.__name__, "XRVClassifier")
         self.assertIs(self.module._target_layer, self.module._model.features.norm5)
 
