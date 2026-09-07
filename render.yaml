@@ -2,7 +2,7 @@ services:
   - type: web
     name: pneumovision
     runtime: docker
-    plan: standard
+    plan: free
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /health
