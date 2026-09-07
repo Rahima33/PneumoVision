@@ -121,6 +121,9 @@ def _get_gradcam():
     if _gradcam is None:
         from gradcam.gradcam import GradCAM, load_trained_xrv_model
 
+        import torch
+
+        torch.set_num_threads(int(os.getenv("TORCH_NUM_THREADS", "1")))
         _model = load_trained_xrv_model(CHECKPOINT_PATH, device=DEVICE)
         _target_layer = _model.features.norm5
         _gradcam = GradCAM(_model, _target_layer)
@@ -134,16 +137,28 @@ def _get_gradcam():
 
 def load_and_classify(state: TriageState) -> dict:
     original_image, input_tensor = preprocess_image_xrv(state["image_path"])
-    cam, predicted_class, confidence = _get_gradcam().generate(input_tensor)
 
     os.makedirs(GRADCAM_OUTPUT_DIR, exist_ok=True)
-    from gradcam.gradcam import overlay_heatmap
+    gradcam_disabled = os.getenv("DISABLE_GRADCAM", "0").lower() in {"1", "true", "yes"}
 
-    overlay = overlay_heatmap(original_image, cam)
+    if gradcam_disabled:
+        import torch
+
+        model = _get_gradcam().model
+        with torch.inference_mode():
+            output = model(input_tensor)
+            predicted_class = output.argmax(dim=1).item()
+            confidence = output.softmax(dim=1)[0, predicted_class].item()
+        overlay = original_image.resize((224, 224))
+    else:
+        from gradcam.gradcam import overlay_heatmap
+
+        cam, predicted_class, confidence = _get_gradcam().generate(input_tensor)
+        overlay = Image.fromarray(overlay_heatmap(original_image, cam))
 
     base_name = os.path.splitext(os.path.basename(state["image_path"]))[0]
     gradcam_path = os.path.join(GRADCAM_OUTPUT_DIR, f"{base_name}_gradcam.png")
-    Image.fromarray(overlay).save(gradcam_path)
+    overlay.save(gradcam_path)
 
     return {
         "prediction": CLASSES[predicted_class],

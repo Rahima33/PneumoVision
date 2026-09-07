@@ -13,3 +13,7 @@ services:
         sync: false
       - key: DISABLE_LOCAL_RAG
         value: "true"
+      - key: DISABLE_GRADCAM
+        value: "true"
+      - key: TORCH_NUM_THREADS
+        value: "1"
