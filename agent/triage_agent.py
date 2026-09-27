@@ -34,7 +34,7 @@ CLASSES = ["NORMAL", "PNEUMONIA"]
 CONFIDENCE_THRESHOLD = 0.75
 GRADCAM_OUTPUT_DIR = "agent_outputs"
 RETRIEVAL_K = 4
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 
 RETRIEVAL_QUERIES = {
     "NORMAL": "normal chest x-ray assessment pediatric pneumonia exclusion criteria",

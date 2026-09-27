@@ -58,7 +58,7 @@ optional. Set these Space variables for the 512 MB CPU tier:
 - `DISABLE_LOCAL_RAG=true`
 - `DISABLE_GRADCAM=true`
 - `TORCH_NUM_THREADS=1`
-- `GROQ_MODEL=llama-3.1-8b-instant`
+- `GROQ_MODEL=openai/gpt-oss-20b`
 
 The first image build downloads the Python wheels and the embedding model, so
 builds can take several minutes. The classifier is loaded only on the first
