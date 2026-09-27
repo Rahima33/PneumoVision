@@ -3,7 +3,7 @@ services:
     name: pneumovision
     runtime: docker
     plan: free
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./Dockerfile.free
     dockerContext: .
     healthCheckPath: /health
     envVars:

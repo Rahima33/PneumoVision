@@ -115,18 +115,29 @@ def preprocess_image_xrv(image_path):
     return _preprocess_image_xrv(image_path)
 
 
-def _get_gradcam():
-    global _model, _target_layer, _gradcam
+def _get_model():
+    global _model
 
-    if _gradcam is None:
-        from gradcam.gradcam import GradCAM, load_trained_xrv_model
+    if _model is None:
+        from gradcam.gradcam import load_trained_xrv_model
 
         import torch
 
         torch.set_num_threads(int(os.getenv("TORCH_NUM_THREADS", "1")))
         _model = load_trained_xrv_model(CHECKPOINT_PATH, device=DEVICE)
-        _target_layer = _model.features.norm5
-        _gradcam = GradCAM(_model, _target_layer)
+
+    return _model
+
+
+def _get_gradcam():
+    global _target_layer, _gradcam
+
+    if _gradcam is None:
+        from gradcam.gradcam import GradCAM
+
+        model = _get_model()
+        _target_layer = model.features.norm5
+        _gradcam = GradCAM(model, _target_layer)
 
     return _gradcam
 
@@ -144,7 +155,7 @@ def load_and_classify(state: TriageState) -> dict:
     if gradcam_disabled:
         import torch
 
-        model = _get_gradcam().model
+        model = _get_model()
         with torch.inference_mode():
             output = model(input_tensor)
             predicted_class = output.argmax(dim=1).item()

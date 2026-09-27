@@ -67,6 +67,11 @@ After deployment, verify `/health`, then upload a test X-ray through `/predict`.
 This is a screening aid, not a diagnostic service; clinician review remains
 required.
 
+The Render free service uses `Dockerfile.free`, which omits Chroma, PDF
+processing, sentence-transformers, and local RAG. It keeps the fallback report
+path and disables Grad-CAM to reduce runtime memory. The full `Dockerfile`
+remains available when those features are needed on a larger instance.
+
 ### Render deployment
 
 `render.yaml` defines a Docker web service with `/health` as the health check. Set `GROQ_API_KEY` in Render before deploying. `HF_TOKEN` is optional but can help avoid Hugging Face rate limits during model downloads.
