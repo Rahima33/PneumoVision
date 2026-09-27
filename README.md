@@ -71,6 +71,9 @@ The Render free service uses `Dockerfile.free`, which omits Chroma, PDF
 processing, sentence-transformers, and local RAG. It keeps the fallback report
 path and disables Grad-CAM to reduce runtime memory. The full `Dockerfile`
 remains available when those features are needed on a larger instance.
+The lightweight loader also constructs the matching DenseNet architecture
+without downloading TorchXRayVision's separate pretrained weights; the
+fine-tuned checkpoint already contains the complete model state.
 
 ### Render deployment
 

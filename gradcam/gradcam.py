@@ -155,10 +155,15 @@ class XRVClassifier(torch.nn.Module):
 
 
 def load_trained_xrv_model(checkpoint_path, device="cpu"):
-    """Load the xrv-backbone checkpoint (different architecture from create_model())."""
-    base = xrv.models.DenseNet(weights="densenet121-res224-all")
+    """Load the xrv-shaped checkpoint without downloading base weights."""
+    base = xrv.models.DenseNet(
+        weights=None,
+        in_channels=1,
+        num_classes=18,
+    )
     model = XRVClassifier(base.features)
-    model.load_state_dict(torch.load(checkpoint_path, map_location=device))
+    checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
+    model.load_state_dict(checkpoint)
     model.to(device)
     model.eval()
     return model
