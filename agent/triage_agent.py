@@ -34,6 +34,7 @@ CLASSES = ["NORMAL", "PNEUMONIA"]
 CONFIDENCE_THRESHOLD = 0.75
 GRADCAM_OUTPUT_DIR = "agent_outputs"
 RETRIEVAL_K = 4
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 
 RETRIEVAL_QUERIES = {
     "NORMAL": "normal chest x-ray assessment pediatric pneumonia exclusion criteria",
@@ -49,7 +50,7 @@ def _build_llm():
         return None
 
     try:
-        return ChatGroq(model="llama-3.3-70b-versatile", temperature=0, api_key=api_key)
+        return ChatGroq(model=GROQ_MODEL, temperature=0, api_key=api_key)
     except Exception:
         return None
 
