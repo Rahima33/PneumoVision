@@ -1,3 +1,12 @@
+---
+title: PneumoVision
+emoji: "🩻"
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+---
+
 ## PneumoVision Docker Monolith
 
 This repository is being packaged as a simplified monolith for deployment.
@@ -36,8 +45,27 @@ The Docker image builds the React frontend, installs the Python runtime dependen
 
 ```powershell
 docker build -t pneumovision:monolith .
-docker run --env-file .env -p 8000:8000 pneumovision:monolith
+docker run --env-file .env -e PORT=7860 -p 7860:7860 pneumovision:monolith
 ```
+
+### Hugging Face Spaces free tier
+
+Create a Docker Space and push this repository to it. Spaces reads the metadata
+above and routes traffic to port `7860`. Add `GROQ_API_KEY` as a Space secret;
+do not commit `.env` or paste its values into the repository. `HF_TOKEN` is
+optional. Set these Space variables for the 512 MB CPU tier:
+
+- `DISABLE_LOCAL_RAG=true`
+- `DISABLE_GRADCAM=true`
+- `TORCH_NUM_THREADS=1`
+
+The first image build downloads the Python wheels and the embedding model, so
+builds can take several minutes. The classifier is loaded only on the first
+image request. Free Spaces may sleep when idle, making that first request slow.
+
+After deployment, verify `/health`, then upload a test X-ray through `/predict`.
+This is a screening aid, not a diagnostic service; clinician review remains
+required.
 
 ### Render deployment
 

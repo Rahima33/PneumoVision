@@ -24,6 +24,6 @@ COPY --from=frontend-build /frontend/dist ./frontend/dist
 RUN python -m rag.build_knowledge_base \
     && rm -rf knowledge_base
 
-EXPOSE 8000
+EXPOSE 7860
 
-CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
