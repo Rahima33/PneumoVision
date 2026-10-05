@@ -78,8 +78,8 @@ if _llm is None:
     _grading_llm = None
     _report_llm = None
 else:
-    _grading_llm = _llm.with_structured_output(RetrievalGrade)
-    _report_llm = _llm.with_structured_output(TriageReport)
+    _grading_llm = _llm.with_structured_output(RetrievalGrade, method="json_mode")
+    _report_llm = _llm.with_structured_output(TriageReport, method="json_mode")
 
 
 # ==========================
@@ -244,7 +244,9 @@ def grade_retrieval(state: TriageState) -> dict:
         f"Judge whether these chunks contain genuinely relevant, "
         f"substantive clinical guidance usable for writing a grounded "
         f"report about this case -- not just topically-adjacent text, "
-        f"reference lists, citations, or administrative content."
+        f"reference lists, citations, or administrative content. "
+        f"Return only a valid JSON object with exactly these keys: "
+        f"sufficient (boolean) and reasoning (string)."
     )
 
     if _grading_llm is None:
@@ -307,6 +309,8 @@ def generate_report(state: TriageState) -> dict:
     f"'disclaimer' must state this is an AI-assisted screening tool, not "
     f"a diagnosis, and that clinician review is required regardless of "
     f"confidence level.\n\n"
+    f"Return only a valid JSON object with exactly these keys: finding, "
+    f"clinical_context, recommended_next_steps, and disclaimer.\n\n"
     f"Retrieved context:\n{chunks_text}"
 )
 
